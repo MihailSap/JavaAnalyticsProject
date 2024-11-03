@@ -14,6 +14,10 @@ public class Task {
         this.maxPointsCount = maxPointsCount;
     }
 
+    public static void main(){
+        
+    }
+
     public String getTitle(){
         return title;
     }
