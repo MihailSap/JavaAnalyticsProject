@@ -1,24 +1,22 @@
 package org.example.Models;
 
+import java.util.ArrayList;
+
 public class Student {
     private final String name;
-    private final String surname;
     private final String group;
     private final int pointsCount;
+    private final ArrayList<Module> modulesForStudent;
 
-    public Student(String name, String surname, String group, int pointsCount){
+    public Student(String name, String group, int pointsCount, ArrayList<Module> modulesForStudent){
         this.name = name;
-        this.surname = surname;
         this.group = group;
         this.pointsCount = pointsCount;
+        this.modulesForStudent = modulesForStudent;
     }
 
     public String getName(){
         return name;
-    }
-
-    public String getSurname(){
-        return surname;
     }
 
     public String getGroup(){
@@ -27,5 +25,15 @@ public class Student {
 
     public int getPointsCount(){
         return pointsCount;
+    }
+
+    public String toString(){
+        return String.format("""
+                        NAME: %s
+                        GROUP:%s
+                        POINTS:%s
+                        MODULES_FOR_STUDENT:%s
+                        """,
+                name, group, pointsCount, modulesForStudent);
     }
 }
