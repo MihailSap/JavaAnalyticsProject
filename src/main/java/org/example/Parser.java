@@ -9,12 +9,14 @@ import java.io.*;
 
 public class Parser {
     public static List<String[]> readCSVFile(String file){
-        var csvParser = new CSVParserBuilder().withSeparator(';').build();
-        try (var builder = new CSVReaderBuilder(
+        var parser = new CSVParserBuilder()
+                .withSeparator(';')
+                .build();
+        try (var reader = new CSVReaderBuilder(
                 new InputStreamReader(new FileInputStream(file)))
-                .withCSVParser(csvParser)
+                .withCSVParser(parser)
                 .build()) {
-            return builder.readAll();
+            return reader.readAll();
         } catch (IOException | CsvException e) {
             throw new RuntimeException(e);
         }
