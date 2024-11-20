@@ -1,9 +1,13 @@
 package org.example;
 
 import com.opencsv.exceptions.CsvException;
+import com.vk.api.sdk.exceptions.ApiException;
+import com.vk.api.sdk.exceptions.ClientException;
 import org.example.Models.Module;
 import org.example.Models.*;
 import com.opencsv.*;
+import org.example.vkApi.VkRepository;
+
 import java.util.*;
 import java.io.*;
 
@@ -22,7 +26,7 @@ public class Parser {
         }
     }
 
-    public static ArrayList<Student> parseStudents(List<String[]> values){
+    public static ArrayList<Student> parseStudents(List<String[]> values)  {
         var students = new ArrayList<Student>();
         for(int i = 3; i < values.size(); i++){
             var name = values.get(i)[0];

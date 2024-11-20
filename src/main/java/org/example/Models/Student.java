@@ -7,6 +7,15 @@ public class Student {
     private final String group;
     private final int pointsCount;
     private final ArrayList<Module> modulesForStudent;
+    private String city;
+
+    public Student(String name, String group, int pointsCount, ArrayList<Module> modulesForStudent, String city){
+        this.name = name;
+        this.group = group;
+        this.pointsCount = pointsCount;
+        this.modulesForStudent = modulesForStudent;
+        this.city = city;
+    }
 
     public Student(String name, String group, int pointsCount, ArrayList<Module> modulesForStudent){
         this.name = name;
