@@ -4,5 +4,6 @@ public enum TasksTypes {
     exercize,
     practice,
     quiz,
-    activities
+    activities,
+    wewewe
 }
