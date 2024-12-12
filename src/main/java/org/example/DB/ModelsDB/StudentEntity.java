@@ -1,2 +1,102 @@
-package org.example.DB.ModelsDB;public class StudentEntity {
+package org.example.DB.ModelsDB;
+
+import org.example.Models.Module;
+import org.hibernate.annotations.Cascade;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name="Student")
+public class StudentEntity {
+    @Id
+    @Column(name="id")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name="name")
+    private String name;
+
+    @Column(name="study_group")
+    private String group;
+
+    @Column(name = "points_count")
+    private int pointsCount;
+
+    @Column(name = "birthday_month")
+    private String birthdayMonth;
+
+    @Column(name = "city")
+    private String city;
+
+    // Что такое mappedBy?
+    @OneToMany(mappedBy = "studentEntity")
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+    private List<ModuleEntity> modulesForStudent;
+
+    public StudentEntity() {}
+
+    public StudentEntity(String name, String group, int pointsCount, String birthdayMonth, String city) {
+        this.name = name;
+        this.group = group;
+        this.pointsCount = pointsCount;
+        this.birthdayMonth = birthdayMonth;
+        this.city = city;
+    }
+
+    public void addModuleEntity(ModuleEntity moduleEntity){
+        if (this.modulesForStudent == null) {
+            this.modulesForStudent = new ArrayList<>();
+        }
+        this.modulesForStudent.add(moduleEntity);
+        moduleEntity.setStudentEntity(this);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public int getPointsCount() {
+        return pointsCount;
+    }
+
+    public void setPointsCount(int pointsCount) {
+        this.pointsCount = pointsCount;
+    }
+
+    public String getBirthdayMonth() {
+        return birthdayMonth;
+    }
+
+    public void setBirthdayMonth(String birthdayMonth) {
+        this.birthdayMonth = birthdayMonth;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public List<ModuleEntity> getModulesForStudent() {
+        return modulesForStudent;
+    }
+
+    public void setModulesForStudent(List<ModuleEntity> modulesForStudent) {
+        this.modulesForStudent = modulesForStudent;
+    }
 }

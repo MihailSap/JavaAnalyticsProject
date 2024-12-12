@@ -2,37 +2,57 @@ package org.example;
 
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
-import org.example.Models.Student;
 import org.example.vkApi.VkRepository;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class Main {
-    public static void main(String[] args) throws ClientException, ApiException {
+    public static void main(String[] args) throws ClientException, ApiException, IOException {
+//        Configuration configuration = new Configuration().addAnnotatedClass(Person.class);
+//        // Для работы с Hibernate
+//        SessionFactory sessionFactory = configuration.buildSessionFactory();
+//        // На нём можно делать save, update, get и т.д.
+//        Session session = sessionFactory.getCurrentSession();
+//
+//        try{
+//            session.beginTransaction();
+//            Person person = new Person("TestPerson", 50);
+//            session.save(person);
+//            session.getTransaction().commit();
+//        } finally {
+//            sessionFactory.close();
+//        }
+
+
+
         var file = "C:\\Users\\msape\\Desktop\\basicprogramming_2.csv";
         var values = Parser.readCSVFile(file);
         var students = Parser.parseStudents(values);
         var vk = new VkRepository();
-        for (Student student : students) {
-            var studentInfo = vk.getUserByName(student.getName());
-            vk.printUserInfo(studentInfo);
-            System.out.println(student.toString());
-        }
+        ArrayList<String> months = new ArrayList<>();
 
+        var countNoData = 0;
+        var countData = 0;
 
-
-
-
-
-
-        
-        //printStudents(values);
-    }
-
-    public static void printStudents(List<String[]> values) throws ClientException, ApiException {
-        var students = Parser.parseStudents(values);
         for(var student : students) {
-            System.out.println(student.toString());
+            var month = vk.getStudentBirthMonth(student.getName());
+            if (month.equals("Нет данных")){
+                countNoData++;
+            }
+            else{
+                countData++;
+            }
+            months.add(month);
+            student.setBirthdayMonth(month);
+            System.out.println(student.getName());
+            System.out.println(month);
         }
+        System.out.println("Всего обработано операций: " + months.size());
+        System.out.println("Найдено данных: " + countData);
+        System.out.println("Не найдено данных: " + countNoData);
     }
 }

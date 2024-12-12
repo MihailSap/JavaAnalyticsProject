@@ -1,17 +1,14 @@
 package org.example.Models;
 
-import java.util.HashMap;
-
 public class Task {
     private final String title;
     private final TasksTypes type;
-    private final int maxPointsCount;
-//     private HashMap<Student, Integer> pointsByStudents;
+    private final int pointsCount;
 
     public Task(String title, TasksTypes type, int maxPointsCount){
         this.title = title;
         this.type = type;
-        this.maxPointsCount = maxPointsCount;
+        this.pointsCount = maxPointsCount;
     }
 
     public String getTitle(){
@@ -22,20 +19,13 @@ public class Task {
         return type;
     }
 
-    public int getMaxPointsCount(){
-        return maxPointsCount;
+    public int getPointsCount(){
+        return pointsCount;
     }
 
     public String toString(){
-        // Убрать перенос в строках 30-31, чтобы при выводе не было отступа
         return String.format("""
-                TITLE: %s
-                TYPE: %s
-                MAX POINTS: %d
-                """, title, type, maxPointsCount);
+                Задание: %s Тип: %s Баллы: %d
+                """ , title, type, pointsCount);
     }
-
-//    public HashMap<Student, Integer> getPointsByStudents(){
-//        return pointsByStudents;
-//    }
 }
