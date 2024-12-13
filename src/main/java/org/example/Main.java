@@ -12,6 +12,11 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws ClientException, ApiException, IOException {
+
+        for(int i = 1; i < 10; i++){
+            System.out.println(i);
+        }
+        System.out.println("Hello, World!");
 //        Configuration configuration = new Configuration().addAnnotatedClass(Person.class);
 //        // Для работы с Hibernate
 //        SessionFactory sessionFactory = configuration.buildSessionFactory();
