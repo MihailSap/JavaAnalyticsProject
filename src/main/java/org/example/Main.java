@@ -2,38 +2,78 @@ package org.example;
 
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
+import org.example.DB.Mapper.StudentsFromDBMapper;
+import org.example.Models.Student;
+import org.example.visualisation.drawer.BarChartDrawer;
+import org.example.visualisation.drawer.LineChartDrawer;
+import org.example.visualisation.drawer.PieChartDrawer;
 import org.example.vkApi.VkRepository;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws ClientException, ApiException, IOException {
-
-        for(int i = 1; i < 10; i++){
-            System.out.println(i);
-        }
-        System.out.println("Hello, World!");
-//        Configuration configuration = new Configuration().addAnnotatedClass(Person.class);
-//        // Для работы с Hibernate
-//        SessionFactory sessionFactory = configuration.buildSessionFactory();
-//        // На нём можно делать save, update, get и т.д.
-//        Session session = sessionFactory.getCurrentSession();
+        var students = StudentsFromDBMapper.getStudentsFromEntitys();
+//        Map<String, Double> averagePointsPerModule = calculateAveragePointsPerModule(students);
 //
-//        try{
-//            session.beginTransaction();
-//            Person person = new Person("TestPerson", 50);
-//            session.save(person);
-//            session.getTransaction().commit();
-//        } finally {
-//            sessionFactory.close();
+//        // Вывод результатов
+//        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+////        for(var student : students) {
+////            System.out.println(student);
+////        }
+//        for (Map.Entry<String, Double> entry : averagePointsPerModule.entrySet()) {
+//            System.out.printf("Средний балл для модуля \"%s\": %.2f%n", entry.getKey(), entry.getValue());
 //        }
 
 
 
+        //List<Student> students = Arrays.asList(
+//                new Student("Alice", "Group1", 85, new ArrayList<>(), "January"),
+//                new Student("Bob", "Group1", 90, new ArrayList<>(), "January"),
+//                new Student("Charlie", "Group2", 70, new ArrayList<>(), "February"),
+//                new Student("David", "Group2", 75, new ArrayList<>(), "February"),
+//                new Student("Eve", "Group3", 95, new ArrayList<>(), "March")
+//        );
+
+        // Вычисляем средние баллы по месяцам
+//        Map<String, Double> averagePointsByMonth = calculateAveragePointsByMonth(students);
+
+        // Выводим результаты
+//        averagePointsByMonth.forEach((month, avgPoints) ->
+//                System.out.println("Месяц: " + month + ", Средние баллы: " + avgPoints));
+
+
+        // Примерно 2 минуты запускается
+        // setVisible - заставляем PieChart показаться
+        // new PieChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
+        // new BarChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
+        // new LineChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
+    }
+
+
+
+    public static Map<String, Double> calculateAveragePointsByMonth(List<Student> students) {
+        // Группируем студентов по месяцу рождения и считаем средние баллы
+        return students.stream()
+                .filter(student -> student.getBirthdayMonth() != null) // Игнорируем студентов без указанного месяца рождения
+                .collect(Collectors.groupingBy(
+                        Student::getBirthdayMonth, // Группировка по месяцу рождения
+                        Collectors.averagingInt(Student::getPointsCount) // Среднее значение баллов
+                ));
+    }
+
+    public void checkDBMapperWork(){
+        var a = StudentsFromDBMapper.getStudentsFromEntitys();
+        for (var student : a){
+            System.out.println(student);
+        }
+    }
+
+    public void checkVkApiWork() throws IOException {
         var file = "C:\\Users\\msape\\Desktop\\basicprogramming_2.csv";
         var values = Parser.readCSVFile(file);
         var students = Parser.parseStudents(values);

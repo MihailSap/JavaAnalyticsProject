@@ -2,10 +2,10 @@ package org.example.Models;
 
 public class Task {
     private final String title;
-    private final TasksTypes type;
+    private final String type;
     private final int pointsCount;
 
-    public Task(String title, TasksTypes type, int maxPointsCount){
+    public Task(String title, String type, int maxPointsCount){
         this.title = title;
         this.type = type;
         this.pointsCount = maxPointsCount;
@@ -15,7 +15,7 @@ public class Task {
         return title;
     }
 
-    public TasksTypes getType(){
+    public String getType(){
         return type;
     }
 

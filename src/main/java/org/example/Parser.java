@@ -52,13 +52,13 @@ public class Parser {
             }
             if (line.contains("Упр:")){
                 var title = line.replace("Упр: ", "");
-                var type = TasksTypes.exercize;
+                var type = "Упражнение";
                 var maxPointsCount = Integer.parseInt(values.get(indexStudent)[i]);
                 var task = new Task(title, type, maxPointsCount);
                 tasks.add(task);
             } else if (line.contains("ДЗ:")){
                 var title = line.replace("ДЗ: ", "");
-                var type = TasksTypes.practice;
+                var type = "Практика";
                 var maxPointsCount = Integer.parseInt(values.get(indexStudent)[i]);
                 var task = new Task(title, type, maxPointsCount);
                 tasks.add(task);

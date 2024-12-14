@@ -5,28 +5,16 @@ plugins {
 group = 'org.example'
 version = '1.0-SNAPSHOT'
 
+//compileJava.options.encoding = 'UTF-8'
+//
+//tasks.withType(JavaCompile) {
+//    options.encoding = 'UTF-8'
+//}
+
+//org.gradle.jvmargs='-Dfile.encoding=UTF-8'
+
 repositories {
     mavenCentral()
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-tasks.withType(Test) {
-    systemProperty 'file.encoding', 'UTF-8'
-}
-
-tasks.withType(Javadoc) {
-    options.encoding = 'UTF-8'
-}
-
-tasks.withType(JavaExec) {
-    systemProperty 'file.encoding', 'UTF-8'
-}
-
-tasks.withType(Test) {
-    jvmArgs '-Dfile.encoding=UTF-8'
 }
 
 dependencies {
@@ -50,8 +38,32 @@ dependencies {
     implementation 'org.hibernate:hibernate-core:5.4.28.Final'
 
 
+    // https://mvnrepository.com/artifact/org.jfree/jfreechart
+    implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.5'
+
 }
 
+tasks.withType(JavaCompile) { // Всё плохо выводит
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test) { // Только БД плохо выводит
+    systemProperty 'file.encoding', 'UTF-8'
+}
+
+tasks.withType(Javadoc) { // Только БД плохо выводит
+    options.encoding = 'UTF-8'
+}
+
+
+tasks.withType(JavaExec) {
+    systemProperty 'file.encoding', 'UTF-8'
+}
+
+
+tasks.withType(Test) {
+    jvmArgs '-Dfile.encoding=UTF-8'
+}
 
 test {
     useJUnitPlatform()
