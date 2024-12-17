@@ -7,50 +7,83 @@ import org.example.Models.Module;
 import org.example.Models.Student;
 import org.example.Models.Task;
 import org.example.Parser;
-import org.example.vkApi.VkRepository;
+//import org.example.vkApi.VkRepository;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-//import org.hibernate.query.Query;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class DBRepository {
+    private static final int THREAD_COUNT = 50; // Количество потоков для обработки
+
     public static void main(String[] args) throws IOException {
         Configuration configuration = new Configuration()
                 .addAnnotatedClass(StudentEntity.class)
                 .addAnnotatedClass(ModuleEntity.class)
                 .addAnnotatedClass(TaskEntity.class);
         SessionFactory sessionFactory = configuration.buildSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
 
-        try{
-            session.beginTransaction();
-            saveStudentsToDB(session);
-            session.getTransaction().commit();
+        try {
+            saveStudentsToDBParallel(sessionFactory);
         } finally {
             sessionFactory.close();
         }
     }
 
-    private  static void saveStudentsToDB(Session session) throws IOException {
+    private static void saveStudentsToDBParallel(SessionFactory sessionFactory) throws IOException {
         var file = "C:\\Users\\msape\\Desktop\\basicprogramming_2.csv";
         var values = Parser.readCSVFile(file);
         var students = Parser.parseStudents(values);
-        var vk = new VkRepository();
-        for (var student : students) {
-            var studentEntity = getStudentEntityToSave(student, vk);
+        //var vk = new VkRepository();
+
+        // Создаем пул потоков
+        var executorService = Executors.newFixedThreadPool(THREAD_COUNT);
+
+        // Запускаем задачи в пуле
+        for (Student student : students) {
+            executorService.submit(() -> {
+                saveStudent(student/*, vk*/, sessionFactory);
+            });
+        }
+
+        // Останавливаем пул потоков
+        executorService.shutdown();
+        while (!executorService.isTerminated()) {
+            // Ждем завершения всех потоков
+        }
+
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+        System.out.println("Все студенты сохранены в БД.");
+    }
+
+    private static void saveStudent(Student student/*, VkRepository vk*/, SessionFactory sessionFactory) {
+        // Создаем отдельную сессию для каждого потока
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            var studentEntity = getStudentEntityToSave(student/*, vk*/);
             session.save(studentEntity);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            System.err.println("Ошибка при сохранении студента: " + student.getName());
+            e.printStackTrace();
         }
     }
 
-    public static StudentEntity getStudentEntityToSave(Student student, VkRepository vk) {
+    public static StudentEntity getStudentEntityToSave(Student student/*, VkRepository vk*/) {
         var studentEntity = new StudentEntity(
                 student.getName(),
                 student.getGroup(),
                 student.getPointsCount(),
-                vk.getStudentBirthMonth(student.getName()),
+                //vk.getStudentBirthMonth(student.getName()),
+                "Нет данных",
                 "Нет данных"
         );
         var modulesForStudent = student.getModulesForStudent();
@@ -63,6 +96,7 @@ public class DBRepository {
             }
             studentEntity.addModuleEntity(moduleEntity);
         }
+
         return studentEntity;
     }
 

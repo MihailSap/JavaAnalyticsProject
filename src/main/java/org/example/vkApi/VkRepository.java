@@ -12,6 +12,7 @@ import com.vk.api.sdk.objects.users.UserFull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VkRepository {
@@ -21,12 +22,16 @@ public class VkRepository {
     private final VkApiClient vk;
     private final UserActor actor;
 
-    public VkRepository() throws IOException {
+    private List<Long> groupIds = new ArrayList<>();
+
+    public VkRepository() throws IOException, ClientException, ApiException {
         TransportClient transportClient = new HttpTransportClient();
         APP_ID = getId();
         ACCESS_TOKEN = getToken();
         vk = new VkApiClient(transportClient);
         actor = new UserActor(APP_ID, ACCESS_TOKEN);
+
+        groupIds = getGroupIds();
     }
 
     private int getId() throws IOException {
@@ -39,32 +44,29 @@ public class VkRepository {
         return Files.readString(Paths.get(path));
     }
 
-    public String getStudentBirthMonth(String inp) {
-        var newName = getRightFormName(inp);
-        getSleep();
+    public String getStudentBirthMonth(String studentName) {
         try {
-            var users = getUsers(newName);
-            if (!users.isEmpty()) {
-                var user = users.get(0);
-                var birthDate = (user.getBdate() != null) ? user.getBdate() : "Не указана))))";
-                return getRightFormMonth(birthDate);
-            } else {
-                return "Нет данных";
+            for (var groupId : groupIds) {
+                var users = getUsersSubscribed(studentName, groupId);
+                if (!users.isEmpty()) {
+                    var user = getUrfuStudent(users);
+                    var birthDate = (user.getBdate() != null) ? user.getBdate() : "Нет данных";
+                    return getRightFormMonth(birthDate);
+                }
             }
+
+            var users = getUsers(studentName);
+            if (!users.isEmpty()) {
+                var user = users.getFirst();
+                var birthDate = (user.getBdate() != null) ? user.getBdate() : "Нет данных";
+                return getRightFormMonth(birthDate);
+            }
+            return "Нет данных";
+
         } catch (ApiException | ClientException e) {
             System.err.println("Произошла ошибка при обращении к VK API: " + e.getMessage());
         }
         return "Нет данных";
-    }
-
-    public String getRightFormName(String inp){
-        var splitInput = inp.split("\\s+");
-        if (splitInput.length > 1) {
-            var lastName = splitInput[0];
-            var firstName = splitInput[1];
-            return lastName + " " + firstName;
-        }
-        return inp;
     }
 
     public void getSleep(){
@@ -75,28 +77,81 @@ public class VkRepository {
         }
     }
 
-    public List<UserFull> getUsers(String name) throws ApiException, ClientException {
+    public UserFull getUrfuStudent(List<UserFull> users) throws ClientException, ApiException {
+        for (var user : users) {
+            if (isUrFUStudent(user)) {
+                return user;
+            }
 
+        }
+        for (var user : users) {
+            if(user.getBdate() != null){
+                return user;
+            }
+
+        }
+        return users.getFirst();
+    }
+
+    public boolean isUrFUStudent(UserFull user) {
+        var universities = user.getUniversities();
+        if (universities == null || universities.isEmpty()) {
+            return false;
+        }
+
+        for(var university : universities){
+            if (university.getName().equals("УрФУ им. первого Президента России Б. Н. Ельцина")){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public List<Long> getGroupIds() throws ClientException, ApiException {
+        List<Long> groupIds = new ArrayList<>();
+        var groupNames = List.of(
+                "Уральский федеральный университет | УрФУ",
+                "Студент УрФУ",
+                "RTF MEMES",
+                "URFU MEMES",
+                "БРС УрФУ Бот"
+        );
+
+        for (var groupName : groupNames) {
+            var group = vk.groups()
+                    .search(actor, groupName)
+                    .count(1)
+                    .execute()
+                    .getItems()
+                    .getFirst();
+            var id = group.getId();
+            groupIds.add(id);
+            getSleep();
+        }
+        return groupIds;
+    }
+
+
+    public List<UserFull> getUsers(String name) throws ClientException, ApiException {
+        getSleep();
         return vk.users()
                 .search(actor)
                 .q(name)
                 .fields(Fields.BDATE)
                 .execute()
                 .getItems();
+    }
 
-
-//        var splitName = name.split("\\s+");
-//        if (splitName.length < 2) {
-//            return List.of();  // Если не удалось разбить имя на части, возвращаем пустой список
-//        }
-//        var firstName = splitName[1];
-//        var lastName = splitName[0];
-//        return vk.users()
-//                .search(actor)
-//                .q(firstName) // передаем имя
-//                .fields(Fields.BDATE)
-//                .execute()
-//                .getItems();
+    public List<UserFull> getUsersSubscribed(String name, Long subscriptionGroupId) throws ApiException, ClientException {
+        getSleep();
+        return vk.users()
+                .search(actor)
+                .q(name)
+                .fields(Fields.BDATE)
+                .groupId(subscriptionGroupId)
+                .execute()
+                .getItems();
     }
 
     public String getRightFormMonth(String bdate){

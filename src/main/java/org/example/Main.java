@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 public class Main {
     public static void main(String[] args) throws ClientException, ApiException, IOException {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
-        var students = StudentsFromDBMapper.getStudentsFromEntitys();
-        for (var student : students) {
-            System.out.println(student);
-        }
+//        var students = StudentsFromDBMapper.getStudentsFromEntitys();
+//        for (var student : students) {
+//            System.out.println(student);
+//        }
 //        Map<String, Double> averagePointsPerModule = calculateAveragePointsPerModule(students);
 //
 //        // Вывод результатов
@@ -56,28 +56,10 @@ public class Main {
         // new PieChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
         // new BarChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
         // new LineChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
+        checkVkApiWork();
     }
 
-
-
-    public static Map<String, Double> calculateAveragePointsByMonth(List<Student> students) {
-        // Группируем студентов по месяцу рождения и считаем средние баллы
-        return students.stream()
-                .filter(student -> student.getBirthdayMonth() != null) // Игнорируем студентов без указанного месяца рождения
-                .collect(Collectors.groupingBy(
-                        Student::getBirthdayMonth, // Группировка по месяцу рождения
-                        Collectors.averagingInt(Student::getPointsCount) // Среднее значение баллов
-                ));
-    }
-
-    public void checkDBMapperWork(){
-        var a = StudentsFromDBMapper.getStudentsFromEntitys();
-        for (var student : a){
-            System.out.println(student);
-        }
-    }
-
-    public void checkVkApiWork() throws IOException {
+    public static void checkVkApiWork() throws IOException, ClientException, ApiException {
         var file = "C:\\Users\\msape\\Desktop\\basicprogramming_2.csv";
         var values = Parser.readCSVFile(file);
         var students = Parser.parseStudents(values);
@@ -103,5 +85,24 @@ public class Main {
         System.out.println("Всего обработано операций: " + months.size());
         System.out.println("Найдено данных: " + countData);
         System.out.println("Не найдено данных: " + countNoData);
+    }
+
+
+
+    public static Map<String, Double> calculateAveragePointsByMonth(List<Student> students) {
+        // Группируем студентов по месяцу рождения и считаем средние баллы
+        return students.stream()
+                .filter(student -> student.getBirthdayMonth() != null) // Игнорируем студентов без указанного месяца рождения
+                .collect(Collectors.groupingBy(
+                        Student::getBirthdayMonth, // Группировка по месяцу рождения
+                        Collectors.averagingInt(Student::getPointsCount) // Среднее значение баллов
+                ));
+    }
+
+    public void checkDBMapperWork(){
+        var a = StudentsFromDBMapper.getStudentsFromEntitys();
+        for (var student : a){
+            System.out.println(student);
+        }
     }
 }
