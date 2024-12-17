@@ -17,7 +17,11 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws ClientException, ApiException, IOException {
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
         var students = StudentsFromDBMapper.getStudentsFromEntitys();
+        for (var student : students) {
+            System.out.println(student);
+        }
 //        Map<String, Double> averagePointsPerModule = calculateAveragePointsPerModule(students);
 //
 //        // Вывод результатов

@@ -11,66 +11,70 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StudentsFromDBMapper {
 
-    public static ArrayList<Student> getStudentsFromEntitys(){
-        Configuration configuration = new Configuration()
+    private static final SessionFactory sessionFactory;
+
+    // Singleton
+    static {
+        sessionFactory = new Configuration()
                 .addAnnotatedClass(StudentEntity.class)
                 .addAnnotatedClass(ModuleEntity.class)
-                .addAnnotatedClass(TaskEntity.class);
-        SessionFactory sessionFactory = configuration.buildSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
+                .addAnnotatedClass(TaskEntity.class)
+                .buildSessionFactory();
+    }
 
-        try{
+    public static ArrayList<Student> getStudentsFromEntitys() {
+        try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
-            List<StudentEntity> studentEntitys = session.createQuery("from StudentEntity")
-                    .setMaxResults(20)
-                    .getResultList();
-            ArrayList<Student> oldStudents = new ArrayList<>();
-            for(StudentEntity studentEntity : studentEntitys){
-                ArrayList<Module> modulesForStudent = getModulesFromEntitys(studentEntity);
-                var newStudent = new Student(
-                        studentEntity.getName(),
-                        studentEntity.getGroup(),
-                        studentEntity.getPointsCount(),
-                        modulesForStudent,
-                        studentEntity.getBirthdayMonth()
-                );
-                oldStudents.add(newStudent);
-            }
+
+            var studentEntities = session.createQuery("""
+                            SELECT DISTINCT s FROM StudentEntity s
+                            LEFT JOIN FETCH s.modulesForStudent m
+                            LEFT JOIN FETCH m.tasksForModule t
+                            """, StudentEntity.class).getResultList();
+
+            var students = studentEntities.stream()
+                    .map(StudentsFromDBMapper::mapToStudent)
+                    .collect(Collectors.toCollection(ArrayList::new));
+
             session.getTransaction().commit();
-            return oldStudents;
-        } finally {
-            sessionFactory.close();
+            return students;
         }
     }
 
-    public static ArrayList<Module> getModulesFromEntitys(StudentEntity studentEntity){
-        var moduleEntitys = studentEntity.getModulesForStudent();
-        ArrayList<Module> modulesForStudent = new ArrayList<>();
-        for(ModuleEntity moduleEntity : moduleEntitys){
-            ArrayList<Task> tasksForModule = getTasksFromEntitys(moduleEntity);
-            var newModule = new Module(
-                    moduleEntity.getTitle(),
-                    tasksForModule
-            );
-            modulesForStudent.add(newModule);
-        }
-        return modulesForStudent;
+    private static Student mapToStudent(StudentEntity studentEntity) {
+        var modules = studentEntity.getModulesForStudent().stream()
+                .map(StudentsFromDBMapper::mapToModule)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        return new Student(
+                studentEntity.getName(),
+                studentEntity.getGroup(),
+                studentEntity.getPointsCount(),
+                modules,
+                studentEntity.getBirthdayMonth()
+        );
     }
 
-    public static ArrayList<Task> getTasksFromEntitys(ModuleEntity moduleEntity){
-        var taskEntitys = moduleEntity.getTasksForModule();
-        ArrayList<Task> tasksForModule = new ArrayList<>();
-        for(TaskEntity taskEntity : taskEntitys){
-            var newTask = new Task(
-                    taskEntity.getTitle(),
-                    taskEntity.getTaskType(),
-                    taskEntity.getPointsCount()
-            );
-            tasksForModule.add(newTask);
-        }
-        return tasksForModule;
+    private static Module mapToModule(ModuleEntity moduleEntity) {
+        var tasks = moduleEntity.getTasksForModule().stream()
+                .map(StudentsFromDBMapper::mapToTask)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        return new Module(
+                moduleEntity.getTitle(),
+                tasks
+        );
+    }
+
+    private static Task mapToTask(TaskEntity taskEntity) {
+        return new Task(
+                taskEntity.getTitle(),
+                taskEntity.getTaskType(),
+                taskEntity.getPointsCount()
+        );
     }
 }

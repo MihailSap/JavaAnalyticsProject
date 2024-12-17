@@ -1,10 +1,9 @@
 package org.example.DB.ModelsDB;
 
-import org.example.Models.Module;
 import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="Student")
@@ -29,10 +28,10 @@ public class StudentEntity {
     @Column(name = "city")
     private String city;
 
-    // Что такое mappedBy?
-    @OneToMany(mappedBy = "studentEntity")
+    // Заменяем List на Set
+    @OneToMany(mappedBy = "studentEntity", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-    private List<ModuleEntity> modulesForStudent;
+    private Set<ModuleEntity> modulesForStudent = new HashSet<>();
 
     public StudentEntity() {}
 
@@ -45,13 +44,21 @@ public class StudentEntity {
     }
 
     public void addModuleEntity(ModuleEntity moduleEntity){
-        if (this.modulesForStudent == null) {
-            this.modulesForStudent = new ArrayList<>();
-        }
         this.modulesForStudent.add(moduleEntity);
         moduleEntity.setStudentEntity(this);
     }
 
+    // Геттер для Set
+    public Set<ModuleEntity> getModulesForStudent() {
+        return modulesForStudent;
+    }
+
+    // Сеттер для Set
+    public void setModulesForStudent(Set<ModuleEntity> modulesForStudent) {
+        this.modulesForStudent = modulesForStudent;
+    }
+
+    // Остальные геттеры и сеттеры
     public String getName() {
         return name;
     }
@@ -90,13 +97,5 @@ public class StudentEntity {
 
     public void setCity(String city) {
         this.city = city;
-    }
-
-    public List<ModuleEntity> getModulesForStudent() {
-        return modulesForStudent;
-    }
-
-    public void setModulesForStudent(List<ModuleEntity> modulesForStudent) {
-        this.modulesForStudent = modulesForStudent;
     }
 }

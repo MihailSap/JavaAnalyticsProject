@@ -1,27 +1,29 @@
 package org.example.DB.ModelsDB;
 
 import org.hibernate.annotations.Cascade;
+
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Module")
 public class ModuleEntity {
     @Id
-    @Column(name="id")
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name="title")
+    @Column(name = "title")
     private String title;
 
     @Column(name = "points_count")
     private int pointsCount;
 
-    @OneToMany(mappedBy = "moduleEntityOwner")
+    // Заменяем List на Set
+    @OneToMany(mappedBy = "moduleEntityOwner", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-    private List<TaskEntity> tasksForModule;
+    private Set<TaskEntity> tasksForModule = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "student_id", referencedColumnName = "id")
@@ -34,10 +36,7 @@ public class ModuleEntity {
         this.pointsCount = pointsCount;
     }
 
-    public void addTaskEntity(TaskEntity taskEntity){
-        if (this.tasksForModule == null) {
-            this.tasksForModule = new ArrayList<>();
-        }
+    public void addTaskEntity(TaskEntity taskEntity) {
         this.tasksForModule.add(taskEntity);
         taskEntity.setModuleEntityOwner(this);
     }
@@ -66,11 +65,11 @@ public class ModuleEntity {
         this.studentEntity = studentEntity;
     }
 
-    public List<TaskEntity> getTasksForModule() {
+    public Set<TaskEntity> getTasksForModule() {
         return tasksForModule;
     }
 
-    public void setTasksForModule(List<TaskEntity> tasksForModule) {
+    public void setTasksForModule(Set<TaskEntity> tasksForModule) {
         this.tasksForModule = tasksForModule;
     }
 }

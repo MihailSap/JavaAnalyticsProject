@@ -37,6 +37,10 @@ dependencies {
     // https://mvnrepository.com/artifact/org.hibernate/hibernate-core
     implementation 'org.hibernate:hibernate-core:5.4.28.Final'
 
+    // https://mvnrepository.com/artifact/com.itextpdf/itextpdf
+    implementation 'com.itextpdf:itextpdf:5.5.13.3'
+
+
 
     // https://mvnrepository.com/artifact/org.jfree/jfreechart
     implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.5'

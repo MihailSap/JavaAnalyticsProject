@@ -6,18 +6,18 @@ import javax.persistence.*;
 @Table(name = "Task")
 public class TaskEntity {
     @Id
-    @Column(name="id")
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
     @JoinColumn(name = "module_id", referencedColumnName = "id")
     private ModuleEntity moduleEntityOwner;
 
-    @Column(name="title")
+    @Column(name = "title")
     private String title;
 
-    @Column(name="task_type")
+    @Column(name = "task_type")
     private String taskType;
 
     @Column(name = "points_count")
@@ -61,9 +61,5 @@ public class TaskEntity {
 
     public void setModuleEntityOwner(ModuleEntity moduleEntityOwner) {
         this.moduleEntityOwner = moduleEntityOwner;
-    }
-
-    public void setTaskEntity(ModuleEntity moduleEntity) {
-
     }
 }

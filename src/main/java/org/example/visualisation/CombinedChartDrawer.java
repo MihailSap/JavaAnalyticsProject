@@ -1,5 +1,9 @@
 package org.example.visualisation;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.example.DB.Mapper.StudentsFromDBMapper;
 import org.example.Models.Student;
 import org.example.visualisation.drawer.LineChartDrawer;
@@ -14,8 +18,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import com.itextpdf.text.Image;
 
 public class CombinedChartDrawer extends JFrame {
     private CardLayout cardLayout;
@@ -34,7 +40,7 @@ public class CombinedChartDrawer extends JFrame {
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
-        cardPanel.add(createMenuPanel(), "Menu");
+        cardPanel.add(createMenuPanel(barChart, pieChart, lineChart), "Menu");
         cardPanel.add(getPanel(barChart), BAR_CHART_BUTTON);
         cardPanel.add(getPanel(pieChart), PIE_CHART_BUTTON);
         cardPanel.add(getPanel(lineChart), LINE_CHART_BUTTON);
@@ -48,15 +54,12 @@ public class CombinedChartDrawer extends JFrame {
 
     public static void main(String[] args) {
         var studentList = StudentsFromDBMapper.getStudentsFromEntitys();
-        var frame = new CombinedChartDrawer("JavaProject", studentList);
+        var frame = new CombinedChartDrawer("JavaProject", (ArrayList<Student>) studentList);
         frame.setVisible(true);
     }
 
-    private JPanel createMenuPanel() {
+    private JPanel createMenuPanel(JFreeChart barChart, JFreeChart pieChart, JFreeChart lineChart) {
         var menuPanel = new JPanel(new BorderLayout());
-
-//        var imageLabel = getImage();
-//        menuPanel.add(imageLabel, BorderLayout.CENTER);
 
         var welcomeLabel = new JLabel("Выберите нужный тип диаграммы", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 48));
@@ -65,11 +68,13 @@ public class CombinedChartDrawer extends JFrame {
         var barChartButton = getMenuButton(BAR_CHART_BUTTON);
         var pieChartButton = getMenuButton(PIE_CHART_BUTTON);
         var lineChartButton = getMenuButton(LINE_CHART_BUTTON);
+        var downloadPdfButton = getDownloadPDFButton(barChart, pieChart, lineChart);
         var exitButton = getExitButton();
 
         buttonPanel.add(barChartButton);
         buttonPanel.add(pieChartButton);
         buttonPanel.add(lineChartButton);
+        buttonPanel.add(downloadPdfButton);
         buttonPanel.add(exitButton);
 
         menuPanel.add(welcomeLabel, BorderLayout.CENTER);
@@ -78,16 +83,40 @@ public class CombinedChartDrawer extends JFrame {
         return menuPanel;
     }
 
-    private JLabel getImage(){
-        var imagePath = "C:\\Users\\msape\\Desktop\\duke.png";
-        var originalIcon = new ImageIcon(imagePath);
-        var originalImage = originalIcon.getImage();
-        var width = 600; // ширина нового изображения
-        var height = 600; // высота нового изображения
-        var resizedImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        var resizedIcon = new ImageIcon(resizedImage);
-        var imageLabel = new JLabel(resizedIcon);
-        return imageLabel;
+    private JButton getDownloadPDFButton(JFreeChart barChart, JFreeChart pieChart, JFreeChart lineChart) {
+        var downloadPdfButton = new JButton("Скачать отчёт");
+        downloadPdfButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    var pdfFile = new File("C:\\Users\\msape\\Desktop\\Report.pdf");
+                    Document document = new Document();
+                    PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+                    document.open();
+                    document.add(new Paragraph("Отчёт с диаграммами"));
+                    document.add(new Paragraph(" "));
+                    addChartToPDF(document, barChart,"Линейчатая диаграмма");
+                    addChartToPDF(document, pieChart,"Круговая диаграмма");
+                    addChartToPDF(document, lineChart,"График");
+                    document.close();
+                    JOptionPane.showMessageDialog(null, "Отчёт успешно сохранён в формате PDF: ", "Успешно!", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Ошибка при создании отчёта: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            }
+        });
+        return downloadPdfButton;
+    }
+
+    private void addChartToPDF(Document document, JFreeChart chart, String chartTitle) throws IOException, DocumentException {
+        var tempFile = File.createTempFile("chart", ".png");
+        ChartUtils.saveChartAsPNG(tempFile, chart, 600, 400);
+        var image = Image.getInstance(tempFile.getAbsolutePath());
+        image.scaleToFit(500, 400);
+        document.add(new Paragraph(chartTitle));
+        document.add(image);
+        document.add(new Paragraph(" "));
     }
 
     private JPanel getPanel(JFreeChart pieChart){

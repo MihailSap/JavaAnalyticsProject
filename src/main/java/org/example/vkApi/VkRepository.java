@@ -76,26 +76,24 @@ public class VkRepository {
     }
 
     public List<UserFull> getUsers(String name) throws ApiException, ClientException {
-        var splitName = name.split("\\s+");
-        if (splitName.length < 2) {
-            return List.of();  // Если не удалось разбить имя на части, возвращаем пустой список
-        }
-        var firstName = splitName[1];
-        var lastName = splitName[0];
 
         return vk.users()
                 .search(actor)
-                .q(firstName) // передаем имя
+                .q(name)
                 .fields(Fields.BDATE)
                 .execute()
                 .getItems();
-//                .stream()
-//                .filter(user -> lastName.equals(user.getLastName())) // фильтруем по фамилии
-//                .toList();
 
+
+//        var splitName = name.split("\\s+");
+//        if (splitName.length < 2) {
+//            return List.of();  // Если не удалось разбить имя на части, возвращаем пустой список
+//        }
+//        var firstName = splitName[1];
+//        var lastName = splitName[0];
 //        return vk.users()
 //                .search(actor)
-//                .q(name)
+//                .q(firstName) // передаем имя
 //                .fields(Fields.BDATE)
 //                .execute()
 //                .getItems();
