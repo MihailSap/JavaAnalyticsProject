@@ -1,5 +1,7 @@
 package org.example.DB;
 
+import com.vk.api.sdk.exceptions.ApiException;
+import com.vk.api.sdk.exceptions.ClientException;
 import org.example.DB.ModelsDB.ModuleEntity;
 import org.example.DB.ModelsDB.StudentEntity;
 import org.example.DB.ModelsDB.TaskEntity;
@@ -7,7 +9,7 @@ import org.example.Models.Module;
 import org.example.Models.Student;
 import org.example.Models.Task;
 import org.example.Parser;
-//import org.example.vkApi.VkRepository;
+import org.example.vkApi.VkRepository;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -22,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DBRepository {
-    private static final int THREAD_COUNT = 50; // Количество потоков для обработки
+    private static final int THREAD_COUNT = 5; // Количество потоков для обработки
 
     public static void main(String[] args) throws IOException {
         Configuration configuration = new Configuration()
@@ -33,42 +35,47 @@ public class DBRepository {
 
         try {
             saveStudentsToDBParallel(sessionFactory);
+        } catch (ClientException | ApiException e) {
+            throw new RuntimeException(e);
         } finally {
             sessionFactory.close();
         }
     }
 
-    private static void saveStudentsToDBParallel(SessionFactory sessionFactory) throws IOException {
+    private static void saveStudentsToDBParallel(SessionFactory sessionFactory) throws IOException, ClientException, ApiException {
         var file = "C:\\Users\\msape\\Desktop\\basicprogramming_2.csv";
         var values = Parser.readCSVFile(file);
         var students = Parser.parseStudents(values);
-        //var vk = new VkRepository();
-
-        // Создаем пул потоков
+        var vk = new VkRepository();
         var executorService = Executors.newFixedThreadPool(THREAD_COUNT);
 
-        // Запускаем задачи в пуле
-        for (Student student : students) {
+        for (var student : students) {
             executorService.submit(() -> {
-                saveStudent(student/*, vk*/, sessionFactory);
+                getSleep(100);
+                saveStudent(student, vk, sessionFactory);
             });
         }
 
-        // Останавливаем пул потоков
         executorService.shutdown();
         while (!executorService.isTerminated()) {
-            // Ждем завершения всех потоков
         }
 
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
         System.out.println("Все студенты сохранены в БД.");
     }
 
-    private static void saveStudent(Student student/*, VkRepository vk*/, SessionFactory sessionFactory) {
-        // Создаем отдельную сессию для каждого потока
+    public static void getSleep(int milliseconds){
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void saveStudent(Student student, VkRepository vk, SessionFactory sessionFactory) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
-            var studentEntity = getStudentEntityToSave(student/*, vk*/);
+            var studentEntity = getStudentEntityToSave(student, vk);
             session.save(studentEntity);
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -77,13 +84,12 @@ public class DBRepository {
         }
     }
 
-    public static StudentEntity getStudentEntityToSave(Student student/*, VkRepository vk*/) {
+    public static StudentEntity getStudentEntityToSave(Student student, VkRepository vk) {
         var studentEntity = new StudentEntity(
                 student.getName(),
                 student.getGroup(),
                 student.getPointsCount(),
-                //vk.getStudentBirthMonth(student.getName()),
-                "Нет данных",
+                vk.getStudentBirthMonth(student.getName()),
                 "Нет данных"
         );
         var modulesForStudent = student.getModulesForStudent();

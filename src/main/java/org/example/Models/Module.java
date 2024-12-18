@@ -13,7 +13,6 @@ public class Module {
         points = getPoints();
     }
 
-    // Добавил новый конструктор для тестов БД
     public Module(String title, ArrayList<Task> tasks, int points){
         this.title = title;
         this.tasks = tasks;
@@ -42,12 +41,4 @@ public class Module {
                 .mapToInt(Task::getPointsCount)
                 .sum();
     }
-
-//    public int getPoints(){
-//        var sum = 0;
-//        for(var task : tasks){
-//            sum += task.getPointsCount();
-//        }
-//        return sum;
-//    }
 }

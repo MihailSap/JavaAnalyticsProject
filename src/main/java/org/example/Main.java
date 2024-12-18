@@ -18,45 +18,8 @@ import java.util.stream.Collectors;
 public class Main {
     public static void main(String[] args) throws ClientException, ApiException, IOException {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
-//        var students = StudentsFromDBMapper.getStudentsFromEntitys();
-//        for (var student : students) {
-//            System.out.println(student);
-//        }
-//        Map<String, Double> averagePointsPerModule = calculateAveragePointsPerModule(students);
-//
-//        // Вывод результатов
-//        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
-////        for(var student : students) {
-////            System.out.println(student);
-////        }
-//        for (Map.Entry<String, Double> entry : averagePointsPerModule.entrySet()) {
-//            System.out.printf("Средний балл для модуля \"%s\": %.2f%n", entry.getKey(), entry.getValue());
-//        }
-
-
-
-        //List<Student> students = Arrays.asList(
-//                new Student("Alice", "Group1", 85, new ArrayList<>(), "January"),
-//                new Student("Bob", "Group1", 90, new ArrayList<>(), "January"),
-//                new Student("Charlie", "Group2", 70, new ArrayList<>(), "February"),
-//                new Student("David", "Group2", 75, new ArrayList<>(), "February"),
-//                new Student("Eve", "Group3", 95, new ArrayList<>(), "March")
-//        );
-
-        // Вычисляем средние баллы по месяцам
-//        Map<String, Double> averagePointsByMonth = calculateAveragePointsByMonth(students);
-
-        // Выводим результаты
-//        averagePointsByMonth.forEach((month, avgPoints) ->
-//                System.out.println("Месяц: " + month + ", Средние баллы: " + avgPoints));
-
-
-        // Примерно 2 минуты запускается
-        // setVisible - заставляем PieChart показаться
-        // new PieChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
-        // new BarChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
-        // new LineChartDrawer("ГЛАВНОЕ MAIN название графика", students).setVisible(true);
         checkVkApiWork();
+        // checkDBMapperWork();
     }
 
     public static void checkVkApiWork() throws IOException, ClientException, ApiException {
@@ -87,21 +50,9 @@ public class Main {
         System.out.println("Не найдено данных: " + countNoData);
     }
 
-
-
-    public static Map<String, Double> calculateAveragePointsByMonth(List<Student> students) {
-        // Группируем студентов по месяцу рождения и считаем средние баллы
-        return students.stream()
-                .filter(student -> student.getBirthdayMonth() != null) // Игнорируем студентов без указанного месяца рождения
-                .collect(Collectors.groupingBy(
-                        Student::getBirthdayMonth, // Группировка по месяцу рождения
-                        Collectors.averagingInt(Student::getPointsCount) // Среднее значение баллов
-                ));
-    }
-
-    public void checkDBMapperWork(){
-        var a = StudentsFromDBMapper.getStudentsFromEntitys();
-        for (var student : a){
+    public static void checkDBMapperWork(){
+        var students = StudentsFromDBMapper.getStudentsFromEntitys();
+        for (var student : students){
             System.out.println(student);
         }
     }

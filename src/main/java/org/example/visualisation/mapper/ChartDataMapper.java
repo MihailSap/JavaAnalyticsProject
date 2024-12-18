@@ -13,6 +13,7 @@ public class ChartDataMapper {
 
     public static PieDataset createStudentByGroupDataset(ArrayList<Student> students){
         var studentsCountByGroups = students.stream()
+                .filter(student -> !"Нет данных".equals(student.getBirthdayMonth()))
                 .collect(
                         Collectors.groupingBy(
                                 Student::getBirthdayMonth,
@@ -38,15 +39,6 @@ public class ChartDataMapper {
         avgPointsPerModule.forEach((k, v) -> dataset.setValue(v, "followersCount", k));
         return dataset;
     }
-
-//    public static Map<String, Double> calculateAveragePointsByMonth(ArrayList<Student> students) {
-//        return students.stream()
-//                .filter(student -> student.getBirthdayMonth() != null)
-//                .collect(Collectors.groupingBy(
-//                        Student::getBirthdayMonth,
-//                        Collectors.averagingInt(Student::getPointsCount)
-//                ));
-//    }
 
     public static Map<String, Double> calculateAveragePointsByMonth(ArrayList<Student> students) {
         return students.stream()

@@ -48,17 +48,14 @@ public class StudentEntity {
         moduleEntity.setStudentEntity(this);
     }
 
-    // Геттер для Set
     public Set<ModuleEntity> getModulesForStudent() {
         return modulesForStudent;
     }
 
-    // Сеттер для Set
     public void setModulesForStudent(Set<ModuleEntity> modulesForStudent) {
         this.modulesForStudent = modulesForStudent;
     }
 
-    // Остальные геттеры и сеттеры
     public String getName() {
         return name;
     }

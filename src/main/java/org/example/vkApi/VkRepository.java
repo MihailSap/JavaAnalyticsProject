@@ -109,7 +109,6 @@ public class VkRepository {
     }
 
     public List<Long> getGroupIds() throws ClientException, ApiException {
-        List<Long> groupIds = new ArrayList<>();
         var groupNames = List.of(
                 "Уральский федеральный университет | УрФУ",
                 "Студент УрФУ",
@@ -118,7 +117,9 @@ public class VkRepository {
                 "БРС УрФУ Бот"
         );
 
+        List<Long> groupIds = new ArrayList<>();
         for (var groupName : groupNames) {
+            getSleep();
             var group = vk.groups()
                     .search(actor, groupName)
                     .count(1)
@@ -127,7 +128,6 @@ public class VkRepository {
                     .getFirst();
             var id = group.getId();
             groupIds.add(id);
-            getSleep();
         }
         return groupIds;
     }

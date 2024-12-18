@@ -20,7 +20,6 @@ public class ModuleEntity {
     @Column(name = "points_count")
     private int pointsCount;
 
-    // Заменяем List на Set
     @OneToMany(mappedBy = "moduleEntityOwner", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private Set<TaskEntity> tasksForModule = new HashSet<>();
