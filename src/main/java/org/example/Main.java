@@ -1,19 +1,59 @@
 package org.example;
 
-import java.util.ArrayList;
+import com.vk.api.sdk.exceptions.ApiException;
+import com.vk.api.sdk.exceptions.ClientException;
+import org.example.DB.Mapper.StudentsFromDBMapper;
+import org.example.Models.Student;
+import org.example.visualisation.drawer.BarChartDrawer;
+import org.example.visualisation.drawer.LineChartDrawer;
+import org.example.visualisation.drawer.PieChartDrawer;
+import org.example.vkApi.VkRepository;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+    public static void main(String[] args) throws ClientException, ApiException, IOException {
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+        checkVkApiWork();
+        // checkDBMapperWork();
+    }
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+    public static void checkVkApiWork() throws IOException, ClientException, ApiException {
+        var file = "C:\\Users\\msape\\Desktop\\basicprogramming_2.csv";
+        var values = Parser.readCSVFile(file);
+        var students = Parser.parseStudents(values);
+        var vk = new VkRepository();
+        ArrayList<String> months = new ArrayList<>();
+
+        var countNoData = 0;
+        var countData = 0;
+
+        for(var student : students) {
+            var month = vk.getStudentBirthMonth(student.getName());
+            if (month.equals("Нет данных")){
+                countNoData++;
+            }
+            else{
+                countData++;
+            }
+            months.add(month);
+            student.setBirthdayMonth(month);
+            System.out.println(student.getName());
+            System.out.println(month);
+        }
+        System.out.println("Всего обработано операций: " + months.size());
+        System.out.println("Найдено данных: " + countData);
+        System.out.println("Не найдено данных: " + countNoData);
+    }
+
+    public static void checkDBMapperWork(){
+        var students = StudentsFromDBMapper.getStudentsFromEntitys();
+        for (var student : students){
+            System.out.println(student);
         }
     }
 }
